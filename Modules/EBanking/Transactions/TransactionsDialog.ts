@@ -20,9 +20,10 @@ export class TransactionsDialog extends EntityDialog<TransactionsRow, any> {
             this.form.ReceiverAccountId.getGridField().toggle(type === TransactionType.Transfer);
         })
 
-        // deleting the admin is handled at the Grid, I removed those itmes from the lookup itself
-        const currentUserId = tryFirst(UserRow.getLookup().items, x => x.Username === Authorization.username)?.UserId.toString();
-        const adminId = tryFirst(UserRow.getLookup().items, x => x.Username === "admin")?.UserId.toString();
+    
+        //handled at both grid and dialog to preserve integrity of data.
+        const currentUserId = tryFirst(UserRow.getLookup()?.items, x => x.Username === Authorization.username)?.UserId.toString();
+        const adminId = tryFirst(UserRow.getLookup()?.items, x => x.Username === "admin")?.UserId.toString();
         if (currentUserId !== adminId)
             this.form.ReceiverAccountId.items.splice(indexOf(this.form.ReceiverAccountId.items, x => x.id === currentUserId), 1);
     

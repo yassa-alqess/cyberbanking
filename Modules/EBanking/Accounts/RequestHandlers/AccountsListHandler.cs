@@ -19,7 +19,6 @@ public class AccountsListHandler : ListRequestHandler<MyRow, MyRequest, MyRespon
     protected override void ApplyFilters(SqlQuery query)
     {
         base.ApplyFilters(query);
-        //if (Permissions.HasPermission(PermissionKeys.Security) == false)
         if (User.Identity.Name != "admin")
         {
             var CurrentUserId = (Int32)User.GetIdentifier().TryParseID();

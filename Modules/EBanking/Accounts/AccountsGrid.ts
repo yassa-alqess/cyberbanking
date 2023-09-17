@@ -17,9 +17,9 @@ export class AccountsGrid extends EntityGrid<AccountsRow, any> {
     protected getButtons() {
         let buttons = super.getButtons();
         if (Authorization.hasPermission(PermissionKeys.Security)) {
-            //delete add button
+            //delete add button for admin
             //buttons.splice(indexOf(buttons, x => x.title == "add"), 1);
-           // buttons.splice(0, 1);
+            buttons.splice(0, 1);
         }
         return buttons;
     }
@@ -36,9 +36,9 @@ export class AccountsGrid extends EntityGrid<AccountsRow, any> {
             filters.splice(indexOf(filters, x => x.field == AccountsRow.Fields.CustomerUsername), 1);
 
         //delete admin as he is not allowed to transfer money, 
-        const adminId = tryFirst(UserRow.getLookup().items, x => x.Username === "admin")?.UserId.toString();
+        const adminId = tryFirst(UserRow.getLookup()?.items, x => x.Username === "admin")?.UserId.toString();
         if(adminId)
-            UserRow.getLookup().items.splice(indexOf(UserRow.getLookup().items, x => x.UserId.toString() === adminId), 1);
+            UserRow.getLookup()?.items.splice(indexOf(UserRow.getLookup().items, x => x.UserId.toString() === adminId), 1);
 
         return filters;
     }

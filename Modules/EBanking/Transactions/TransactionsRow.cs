@@ -80,14 +80,6 @@ public sealed class TransactionsRow : Row<TransactionsRow.RowFields>, IIdRow, IN
         get => fields.ReceiverAccountId[this];
         set => fields.ReceiverAccountId[this] = value;
     }
-    /*
-    [DisplayName("To"), NotMapped]
-    public string ReceiverUsername
-    {
-        get => fields.ReceiverUsername[this];
-        set => fields.ReceiverUsername[this] = value;
-    }
-    */
 
     public class RowFields : RowFieldsBase
     {
@@ -98,8 +90,5 @@ public sealed class TransactionsRow : Row<TransactionsRow.RowFields>, IIdRow, IN
         public StringField Description;
         public Int32Field SenderAccountId;
         public Int32Field ReceiverAccountId;
-        //public StringField SenderUsername;
-        //public StringField ReceiverUsername;
-
     }
 }

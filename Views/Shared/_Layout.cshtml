@@ -1,4 +1,4 @@
-﻿@inject Serenity.Navigation.INavigationModelFactory NavigationModelFactory
+@inject Serenity.Navigation.INavigationModelFactory NavigationModelFactory
 <!DOCTYPE html>
 @{
     Func<string, HtmlString> json = x => new HtmlString(Serenity.JSON.Stringify(x));
@@ -12,6 +12,7 @@
     <partial name="@MVC.Views.Shared._LayoutHead" />
     @RenderSection("Head", false)
     <title>@(ViewData["Title"]) - cyberbanking</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
 </head>
 <body id="s-@(ViewData["PageId"])Page" class="@(ViewData["BodyClass"]) @(sidebarPaneCollapsed)">
 <div id="PageBackground" style="display: none"></div>

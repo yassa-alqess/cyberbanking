@@ -1,4 +1,4 @@
-﻿using Serenity.ComponentModel;
+using Serenity.ComponentModel;
 using Serenity.Data;
 using Serenity.Data.Mapping;
 using System;
@@ -11,7 +11,7 @@ namespace cyberbanking.Administration
     [DisplayName("Users"), InstanceName("User")]
     [ReadPermission(PermissionKeys.Security)]
     [ModifyPermission(PermissionKeys.Security)]
-    [LookupScript(Permission = PermissionKeys.Security)]
+    [LookupScript(Permission = "?", Expiration = -1)]
     public sealed class UserRow : Serenity.Extensions.Entities.LoggingRow<UserRow.RowFields>, IIdRow, INameRow, IIsActiveRow
     {
         [DisplayName("User Id"), Identity, IdProperty]

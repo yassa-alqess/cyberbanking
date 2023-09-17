@@ -5,6 +5,8 @@ using System;
 using MyRequest = Serenity.Services.ListRequest;
 using MyResponse = Serenity.Services.ListResponse<cyberbanking.EBanking.TransactionsRow>;
 using MyRow = cyberbanking.EBanking.TransactionsRow;
+using System.Linq;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 
 namespace cyberbanking.EBanking;
 
@@ -19,12 +21,33 @@ public class TransactionsListHandler : ListRequestHandler<MyRow, MyRequest, MyRe
     protected override void ApplyFilters(SqlQuery query)
     {
         base.ApplyFilters(query);
-        //if (Permissions.HasPermission(PermissionKeys.Security) == false)
         if (User.Identity.Name != "admin")
         {
+
+            //getting all accounts of the current user,
+            //then getting all transactions of those accounts
+
             var CurrentUserId = (Int32)User.GetIdentifier().TryParseID();
-            query.Where(MyRow.Fields.SenderAccountId == AccountsRow.Fields.AccountId);
+            var fld = MyRow.Fields;
+            var Accounts = Connection.List<AccountsRow>().Where(r => r.CustomerId == CurrentUserId && r.IsActive == true).ToList();
+            
+             query.Where(
+                 fld.SenderAccountId.In(Accounts.Select(r => r.AccountId)) ||
+                 fld.ReceiverAccountId.In(Accounts.Select(r => r.AccountId)));
+            
+
+              /*
+                var acc = AccountsRow.Fields.As("acc");
+                query.Where(Criteria.Exists(
+                query.SubQuery()
+                    .From(acc)
+                    .Select("1")
+                    .Where(
+                        acc.CustomerId == CurrentUserId &&
+                        (fld.SenderAccountId.In(Accounts.Select(r => r.AccountId)) ||
+                        fld.ReceiverAccountId.In(Accounts.Select(r => r.AccountId))))
+                    .ToString()));
+              */
         }
     }
-
 }

@@ -11,7 +11,7 @@ export class TransactionListFormatter implements Formatter {
         if (!id)
             return "";
 
-        let byId = UserRow.getLookup().itemById; //why depricated
+        let byId = UserRow.getLookup()?.itemById; //why depricated
         let g = byId[id];
         if (!g)
             return id.toString();

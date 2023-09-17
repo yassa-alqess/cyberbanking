@@ -7,10 +7,10 @@ namespace cyberbanking.EBanking.Transactions
     public enum TransactionType
     {
         [Description("Deposit")]
-        Deposit,
+        Deposit = 1,
         [Description("Withdrawal")]
-        Withdrawal,
+        Withdrawal = 2,
         [Description("Transfer")]
-        Transfer,
+        Transfer = 3,
     }
 }

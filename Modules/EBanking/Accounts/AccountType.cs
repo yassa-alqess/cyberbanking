@@ -7,13 +7,13 @@ namespace cyberbanking.EBanking.Accounts
     public enum AccountType
     {
         [Description("Savings")]
-        Savings,
+        Savings = 1,
         [Description("Checking")]
-        Checking,
+        Checking = 2,
         [Description("Credit Card")]
-        CreditCard,
+        CreditCard = 3,
         [Description("Loan")]
-        Loan,
+        Loan = 4,
 
     }
 }

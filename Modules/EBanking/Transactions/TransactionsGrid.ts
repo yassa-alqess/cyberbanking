@@ -1,7 +1,7 @@
 import { Decorators, EntityGrid, QuickSearchField } from '@serenity-is/corelib';
-import { PermissionKeys, TransactionsColumns, TransactionsRow, TransactionsService } from '@/ServerTypes/EBanking';
+import { PermissionKeys, TransactionsColumns, TransactionsRow, TransactionsService, TransactionType } from '@/ServerTypes/EBanking';
 import { TransactionsDialog } from './TransactionsDialog';
-import { Authorization, indexOf, text, first, tryFirst, } from '@serenity-is/corelib/q';
+import { Authorization, indexOf, text, first, tryFirst, toId, } from '@serenity-is/corelib/q';
 import { UserRow } from '../../Administration';
 
 @Decorators.registerClass('cyberbanking.EBanking.TransactionsGrid')
@@ -17,13 +17,38 @@ export class TransactionsGrid extends EntityGrid<TransactionsRow, any> {
     protected getQuickFilters() {
         let filters = super.getQuickFilters();
         if (!Authorization.hasPermission(PermissionKeys.Security))
-            filters.splice(indexOf(filters, x => x.field == TransactionsRow.Fields.ReceiverAccountId), 1);
+            filters.splice(indexOf(filters, x => x.field == TransactionsRow.Fields.SenderAccountId), 1);
+
+        /*
+        * Hide receiver filter if transaction type is not transfer
+        const receiverFilter = first(filters, x => x.field == TransactionsRow.Fields.ReceiverAccountId);
+        const transactionTypeFilter = first(filters, x => x.field == TransactionsRow.Fields.TransactionType);
+        this.changeSelect2(e => {
+            const type = parseInt(e.val);
+            console.log(e);
+            if (type != TransactionType.Transfer) {
+                console.log("adding receiver filter");
+                filters.splice(indexOf(filters, x => x.field == TransactionsRow.Fields.ReceiverAccountId), 1);
+            }
+            else {
+                filters.splice(indexOf(filters, x => x.field == TransactionsRow.Fields.ReceiverAccountId), 1);
+                filters.push(receiverFilter);
+            }
+
+        })
+        */
 
 
-        //delete admin as he is not allowed to transfer money
-        const adminId = tryFirst(UserRow.getLookup().items, x => x.Username === "admin")?.UserId.toString();
-        if(adminId)
-            UserRow.getLookup().items.splice(indexOf(UserRow.getLookup().items, x => x.UserId.toString() === adminId), 1);
+
+         //delete admin as he is not allowed to transfer money neither has accounts,
+        //also here i'm removing the current user, giving that he can't transfer for some other arbitary account owned by him.
+        //it may be a feature to be added later.
+        const adminId = tryFirst(UserRow.getLookup()?.items, x => x.Username === "admin")?.UserId;
+        const currentUserId = tryFirst(UserRow.getLookup().items, x => x.Username === Authorization.username)?.UserId;
+        if (adminId)
+            UserRow.getLookup()?.items.splice(indexOf(UserRow.getLookup()?.items, x => x.UserId === adminId), 1);
+        if (currentUserId !== adminId)
+            UserRow.getLookup()?.items.splice(indexOf(UserRow.getLookup()?.items, x => x.UserId === currentUserId), 1);
 
         return filters;
     }
@@ -40,17 +65,17 @@ export class TransactionsGrid extends EntityGrid<TransactionsRow, any> {
     protected getButtons() {
         let buttons = super.getButtons();
         if (Authorization.hasPermission(PermissionKeys.Security)) {
-            //delete add button
+            //delete add button for admin
             //buttons.splice(indexOf(buttons, x => x.title == "add"), 1);
-            // buttons.splice(0, 1);
+            buttons.splice(0, 1);
         }
         return buttons;
     }
     protected getColumns() {
         const cols = super.getColumns();
         const senderCol = first(cols, x => x.field == TransactionsRow.Fields.SenderAccountId);
-        if (Authorization.hasPermission(PermissionKeys.Security))
-            senderCol.visible = true;
+        if (!Authorization.hasPermission(PermissionKeys.Security))
+            senderCol.visible = false;
         return cols;
     }
 }

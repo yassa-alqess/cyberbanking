@@ -1,4 +1,4 @@
-﻿using FluentMigrator;
+using FluentMigrator;
 using Serenity.Extensions;
 
 namespace cyberbanking.Migrations.DefaultDB

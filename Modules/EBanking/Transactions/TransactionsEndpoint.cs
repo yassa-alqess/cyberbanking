@@ -25,7 +25,7 @@ public class TransactionsEndpoint : ServiceEndpoint
     {
         using (TransactionScope scope = new TransactionScope())
         {
-            //connection.Open();
+            //connection.Open();  //better leave dapper handle those stuff
             var senderId = request.Entity.SenderAccountId;
             var receiverId = request.Entity.ReceiverAccountId;
             if (senderId == null)
@@ -35,36 +35,44 @@ public class TransactionsEndpoint : ServiceEndpoint
 
             request.Entity.TransactionDate = DateTime.Now;
 
+
+            //for the demo, I'm fetching the first account I encounter
+            //maybe later I will utilize AccountType to add more features/logic to my app
             var SenderAccount = uow.Connection.List<AccountsRow>().FirstOrDefault(a => a.AccountId == senderId);
             var ReceiverAccount = uow.Connection.List<AccountsRow>().FirstOrDefault(a => a.AccountId == receiverId);
             var Amount = request.Entity.Amount;
-
             var transactionType = request.Entity.TransactionType;
-            //ReceiverAccount.Balance += Amount;
             switch (transactionType)
             {
                 case TransactionType.Deposit:
-                    // HandleTransactionType(new DepositeHandler(), SenderAccount, ReceiverAccount, Amount);
-                    SenderAccount.Balance += Amount;
+                     //SenderAccount.Balance += Amount;
+                    HandleTransactionType(new DepositeHandler(), SenderAccount, ReceiverAccount, Amount);
                     uow.Connection.UpdateById(SenderAccount);
                     break;
                 case TransactionType.Withdrawal:
-                    SenderAccount.Balance -= Amount;
+                    if (Amount > SenderAccount.Balance)
+                        throw new Exception("Insufficient Balance");
+                    //SenderAccount.Balance -= Amount;
+                    HandleTransactionType(new WithdrawalHandler(), SenderAccount, ReceiverAccount, Amount);
                     uow.Connection.UpdateById(SenderAccount);
-                    // HandleTransactionType(new WithdrawalHandler(), SenderAccount, ReceiverAccount, Amount);
                     break;
                 case TransactionType.Transfer:
-                    SenderAccount.Balance -= Amount;
-                    ReceiverAccount.Balance += Amount;
+                    if (Amount > SenderAccount.Balance)
+                        throw new Exception("Insufficient Balance");
+                    //SenderAccount.Balance -= Amount;
+                    //ReceiverAccount.Balance += Amount;
+                    HandleTransactionType(new TransferHandler(), SenderAccount, ReceiverAccount, Amount);
                     uow.Connection.UpdateById(SenderAccount);
                     uow.Connection.UpdateById(ReceiverAccount);
-                    // HandleTransactionType(new TransferHandler(), SenderAccount, ReceiverAccount, Amount);
                     break;
                 default:
                     break;
             }
-            // uow.Connection.UpdateById(SenderAccount);
-            //uow.Connection.UpdateById(ReceiverAccount);
+            //I know there is a Desgin issue above here,
+            //but I don't have enough for refactorting right now, maybe later.
+
+
+            //better leave dapper handle those stuff
             //connection.Dispose();
             //connection.Close();
             scope.Complete();
@@ -76,6 +84,7 @@ public class TransactionsEndpoint : ServiceEndpoint
 
         handler.HandleTransactionType(sender, receiver, amount);
     }
+
     /*
         [HttpPost, AuthorizeUpdate(typeof(MyRow))]
         public SaveResponse Update(IUnitOfWork uow, SaveRequest<MyRow> request,
@@ -91,6 +100,7 @@ public class TransactionsEndpoint : ServiceEndpoint
             return handler.Delete(uow, request);
         }
     */
+
     [HttpPost]
     public RetrieveResponse<MyRow> Retrieve(IDbConnection connection, RetrieveRequest request,
         [FromServices] ITransactionsRetrieveHandler handler)
