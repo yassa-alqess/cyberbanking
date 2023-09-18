@@ -1,3 +1,4 @@
+using cyberbanking.EBanking.Accounts;
 using cyberbanking.EBanking.Transactions;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
@@ -26,41 +27,49 @@ public class TransactionsEndpoint : ServiceEndpoint
         using (TransactionScope scope = new TransactionScope())
         {
             //connection.Open();  //better leave dapper handle those stuff
-            var senderId = request.Entity.SenderAccountId;
-            var receiverId = request.Entity.ReceiverAccountId;
-            if (senderId == null)
-                request.Entity.SenderAccountId = senderId = (Int32)User.GetIdentifier().TryParseID();
-            if (receiverId == null)
-                request.Entity.ReceiverAccountId = receiverId = (Int32)User.GetIdentifier().TryParseID();
-
-            request.Entity.TransactionDate = DateTime.Now;
-
-
-            //for the demo, I'm fetching the first account I encounter
-            //maybe later I will utilize AccountType to add more features/logic to my app
-            var SenderAccount = uow.Connection.List<AccountsRow>().FirstOrDefault(a => a.AccountId == senderId);
-            var ReceiverAccount = uow.Connection.List<AccountsRow>().FirstOrDefault(a => a.AccountId == receiverId);
+            var currentUserId = (Int32)User.GetIdentifier().TryParseID();
             var Amount = request.Entity.Amount;
             var transactionType = request.Entity.TransactionType;
+            var savingAccounts = uow.Connection.List<AccountsRow>()
+                                                .Where(r =>  r.CustomerId == currentUserId &&
+                                                             r.IsActive == true &&
+                                                             r.AccountType == AccountType.Savings);
+
+            var senderId = request.Entity.SenderAccountId;
+            var receiverId = request.Entity.ReceiverAccountId;
+            if (request.Entity.SenderAccountId is null)
+            {
+                senderId = savingAccounts.FirstOrDefault().AccountId.Value;
+                if (transactionType != TransactionType.Deposit) //only withdraw from savings accounts.
+                     senderId = savingAccounts.FirstOrDefault(r => r.Balance > Amount).AccountId.Value;
+            }  
+            if (request.Entity.ReceiverAccountId is null)
+                receiverId = savingAccounts.FirstOrDefault().AccountId.Value;
+
+            request.Entity.SenderAccountId = senderId;
+            request.Entity.ReceiverAccountId = receiverId;
+            request.Entity.TransactionDate = DateTime.Now;
+
+            var SenderAccount = uow.Connection.List<AccountsRow>().FirstOrDefault(a => a.AccountId == senderId);
+            var ReceiverAccount = uow.Connection.List<AccountsRow>().FirstOrDefault(a => a.AccountId == receiverId);
+            if (SenderAccount is null || ReceiverAccount is null)
+                throw new Exception("can't process that transfer as either sender or receiver may not has account");
+            
             switch (transactionType)
             {
                 case TransactionType.Deposit:
-                     //SenderAccount.Balance += Amount;
                     HandleTransactionType(new DepositeHandler(), SenderAccount, ReceiverAccount, Amount);
                     uow.Connection.UpdateById(SenderAccount);
                     break;
                 case TransactionType.Withdrawal:
                     if (Amount > SenderAccount.Balance)
                         throw new Exception("Insufficient Balance");
-                    //SenderAccount.Balance -= Amount;
                     HandleTransactionType(new WithdrawalHandler(), SenderAccount, ReceiverAccount, Amount);
                     uow.Connection.UpdateById(SenderAccount);
                     break;
                 case TransactionType.Transfer:
                     if (Amount > SenderAccount.Balance)
                         throw new Exception("Insufficient Balance");
-                    //SenderAccount.Balance -= Amount;
-                    //ReceiverAccount.Balance += Amount;
                     HandleTransactionType(new TransferHandler(), SenderAccount, ReceiverAccount, Amount);
                     uow.Connection.UpdateById(SenderAccount);
                     uow.Connection.UpdateById(ReceiverAccount);
@@ -70,7 +79,6 @@ public class TransactionsEndpoint : ServiceEndpoint
             }
             //I know there is a Desgin issue above here,
             //but I don't have enough for refactorting right now, maybe later.
-
 
             //better leave dapper handle those stuff
             //connection.Dispose();

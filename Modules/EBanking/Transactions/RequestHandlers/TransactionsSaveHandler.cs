@@ -18,15 +18,6 @@ public class TransactionsSaveHandler : SaveRequestHandler<MyRow, MyRequest, MyRe
     protected override void BeforeSave()
     {
         base.BeforeSave();
-        /*
-            Handeled at transaction Endpoints
-
-            if (Row.SenderAccountId == null)
-                Row.SenderAccountId = (Int32)User.GetIdentifier().TryParseID();
-            if (Row.ReceiverAccountId == null)
-                Row.ReceiverAccountId = (Int32)User.GetIdentifier().TryParseID();
-            Row.TransactionDate = (DateTime.Now);
-        */
     }
 
 }

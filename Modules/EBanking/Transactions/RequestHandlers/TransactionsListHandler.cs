@@ -29,25 +29,28 @@ public class TransactionsListHandler : ListRequestHandler<MyRow, MyRequest, MyRe
 
             var CurrentUserId = (Int32)User.GetIdentifier().TryParseID();
             var fld = MyRow.Fields;
-            var Accounts = Connection.List<AccountsRow>().Where(r => r.CustomerId == CurrentUserId && r.IsActive == true).ToList();
-            
-             query.Where(
-                 fld.SenderAccountId.In(Accounts.Select(r => r.AccountId)) ||
-                 fld.ReceiverAccountId.In(Accounts.Select(r => r.AccountId)));
+            var AccountIds = Connection.List<AccountsRow>()
+                            .Where(r => r.CustomerId == CurrentUserId && r.IsActive == true)
+                            .Select(r=> r.AccountId)
+                            .ToList();
+
+            query.Where(
+                fld.SenderAccountId.In(AccountIds) ||
+                fld.ReceiverAccountId.In(AccountIds));
             
 
-              /*
-                var acc = AccountsRow.Fields.As("acc");
-                query.Where(Criteria.Exists(
-                query.SubQuery()
-                    .From(acc)
-                    .Select("1")
-                    .Where(
-                        acc.CustomerId == CurrentUserId &&
-                        (fld.SenderAccountId.In(Accounts.Select(r => r.AccountId)) ||
-                        fld.ReceiverAccountId.In(Accounts.Select(r => r.AccountId))))
-                    .ToString()));
-              */
+            /*
+              var acc = AccountsRow.Fields.As("acc");
+              query.Where(Criteria.Exists(
+              query.SubQuery()
+                  .From(acc)
+                  .Select("1")
+                  .Where(
+                      acc.CustomerId == CurrentUserId &&
+                      (fld.SenderAccountId.In(Accounts.Select(r => r.AccountId)) ||
+                      fld.ReceiverAccountId.In(Accounts.Select(r => r.AccountId))))
+                  .ToString()));
+            */
         }
     }
 }

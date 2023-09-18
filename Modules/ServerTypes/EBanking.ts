@@ -1,4 +1,5 @@
 ﻿export * from "./EBanking/Accounts.AccountType"
+export * from "./EBanking/Accounts.DeactivateListRequest"
 export * from "./EBanking/AccountsColumns"
 export * from "./EBanking/AccountsForm"
 export * from "./EBanking/AccountsRow"

@@ -1,4 +1,6 @@
+using cyberbanking.EBanking.Accounts;
 using Microsoft.AspNetCore.Mvc;
+using Serenity;
 using Serenity.Data;
 using Serenity.Reporting;
 using Serenity.Services;
@@ -6,6 +8,7 @@ using Serenity.Web;
 using System;
 using System.Data;
 using System.Globalization;
+using System.Linq;
 using MyRow = cyberbanking.EBanking.AccountsRow;
 
 namespace cyberbanking.EBanking.Endpoints;
@@ -48,6 +51,23 @@ public class AccountsEndpoint : ServiceEndpoint
         [FromServices] IAccountsListHandler handler)
     {
         return handler.List(connection, request);
+    }
+
+    [HttpPost, JsonRequest]
+    public SaveResponse DeactivateList(IUnitOfWork uow, DeactivateListRequest request, [FromServices] IAccountsSaveHandler handler)
+    {
+
+        foreach (var accountId in request.AccountIds)
+        {
+            var row = uow.Connection.List<MyRow>().FirstOrDefault(w => w.AccountId == accountId.TryParseID32());
+            if (row != null && row.IsActive == true)
+            {
+                row.IsActive = false;
+                uow.Connection.UpdateById(row);
+                //handler.Update(uow, new SaveRequest<MyRow>{ EntityId = row.AccountId });
+            }
+        }
+        return new SaveResponse();
     }
 
     [HttpPost, AuthorizeList(typeof(MyRow))]
