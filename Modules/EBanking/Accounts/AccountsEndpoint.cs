@@ -21,7 +21,6 @@ public class AccountsEndpoint : ServiceEndpoint
     public SaveResponse Create(IUnitOfWork uow, SaveRequest<MyRow> request,
         [FromServices] IAccountsSaveHandler handler)
     {
-
         return handler.Create(uow, request);
     }
 /*

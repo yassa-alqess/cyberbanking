@@ -34,7 +34,8 @@ public class TransactionsEndpoint : ServiceEndpoint
                                                 .Where(r =>  r.CustomerId == currentUserId &&
                                                              r.IsActive == true &&
                                                              r.AccountType == AccountType.Savings);
-
+            if (savingAccounts is null)
+                throw new Exception("Error processing current transactions, maybe user has no active account");
             var senderId = request.Entity.SenderAccountId;
             var receiverId = request.Entity.ReceiverAccountId;
             if (request.Entity.SenderAccountId is null)
