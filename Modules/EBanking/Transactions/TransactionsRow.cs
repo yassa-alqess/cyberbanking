@@ -1,4 +1,5 @@
 using cyberbanking.Administration;
+using cyberbanking.EBanking.Accounts;
 using cyberbanking.EBanking.Transactions;
 using Serenity.ComponentModel;
 using Serenity.Data;
@@ -33,7 +34,7 @@ public sealed class TransactionsRow : Row<TransactionsRow.RowFields>, IIdRow, IN
         set => fields.Amount[this] = value;
     }
 
-    [DisplayName("Type"), NotNull]
+    [DisplayName("Transaction Type"), NotNull]
     public TransactionType? TransactionType
     {
         get => fields.TransactionType[this];
@@ -81,6 +82,19 @@ public sealed class TransactionsRow : Row<TransactionsRow.RowFields>, IIdRow, IN
         set => fields.ReceiverAccountId[this] = value;
     }
 
+    [NotMapped, Expression(jSenderAccount + ".[AccountType]"), DisplayName("From Which")]
+    public AccountType? SenderAccountType
+    {
+        get => fields.SenderAccountType[this];
+        set => fields.SenderAccountType[this] = value;
+    }
+    [NotMapped, Expression(jReceiverAccount + ".[AccountType]"), DisplayName("To Which")]
+    public AccountType? ReceiverAccountType
+    {
+        get => fields.ReceiverAccountType[this];
+        set => fields.ReceiverAccountType[this] = value;
+    }
+
     public class RowFields : RowFieldsBase
     {
         public Int32Field TransactionId;
@@ -90,5 +104,8 @@ public sealed class TransactionsRow : Row<TransactionsRow.RowFields>, IIdRow, IN
         public StringField Description;
         public Int32Field SenderAccountId;
         public Int32Field ReceiverAccountId;
+
+        public EnumField<AccountType> SenderAccountType;
+        public EnumField<AccountType> ReceiverAccountType;
     }
 }

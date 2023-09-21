@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Serenity.Data;
 using Serenity.Services;
 using System.Data;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using MyRow = cyberbanking.Administration.UserRow;
@@ -39,6 +40,28 @@ namespace cyberbanking.Administration.Endpoints
         public ListResponse<MyRow> List(IDbConnection connection, UserListRequest request, [FromServices] IUserListHandler handler)
         {
             return handler.List(connection, request);
+        }
+
+
+        public class GetUserByNameRequest : ServiceRequest
+        {
+            public string Username { get; set; }
+        }
+
+        public class GetUserByNameResponse : ServiceResponse
+        {
+            public int Id  { get; set; }
+        }
+
+        public GetUserByNameResponse GetByUserName(IDbConnection connection, GetUserByNameRequest requset)
+        {
+            //var request = new RetrieveRequest();
+            //requset.EntityId = connection.List<MyRow>().FirstOrDefault(r => r.Username == (string)requset.EntityId).UserId;
+            //return handler.Retrieve(connection, requset);
+            var user = connection.List<MyRow>().FirstOrDefault(r => r.Username == requset.Username);
+            if (user is null)
+                throw new System.Exception("user not found");
+            return new GetUserByNameResponse { Id = user.UserId.Value };
         }
     }
 }

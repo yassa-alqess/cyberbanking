@@ -1,4 +1,4 @@
-﻿@model cyberbanking.Common.DashboardPageModel
+@model cyberbanking.Common.DashboardPageModel
 @inject Serenity.ITextLocalizer Localizer
 @{
     ViewData["Title"] = "Dashboard";
@@ -10,9 +10,6 @@
 @Html.ScriptBundle("Pages/Dashboard")
 }
 
-@section ContentHeader {
-    <h1>@Localizer.Get("Navigation.Dashboard")</h1>
-}
 
 <style>
 .s-dashboard-card, .s-dashboard-card-sm {
@@ -101,55 +98,40 @@
     <div class="col-lg-3 col-sm-6">
         <div class="card s-dashboard-card-sm bg-primary bg-opacity-50">
             <div class="card-body">
-                <h3>@Model.OpenOrders</h3>
-                <p>Open Orders</p>
+                <h3>10</h3>
+                <p>Active Accounts</p>
             </div>
-            <div class="icon">
-                <i class="fa fa-shopping-cart"></i>
-            </div>
+
         </div>
     </div>
     <div class="col-lg-3 col-sm-6">
         <div class="card s-dashboard-card-sm s-alt bg-info bg-opacity-50">
             <div class="card-body">
-                <h3>@Model.ClosedOrderPercent<sup style="font-size: 20px">%</sup></h3>
-                <p>Closed Orders</p>
+                <h3>0<sup style="font-size: 20px">%</sup></h3>
+                <p>Deactivated Accounts</p>
             </div>
-            <div class="icon">
-                <i class="fa fa-truck"></i>
-            </div>
+
         </div>
     </div>
     <div class="col-lg-3 col-sm-6">
         <div class="card s-dashboard-card-sm bg-warning bg-opacity-50">
             <div class="card-body">
-                <h3>@Model.CustomerCount</h3>
-                <p>Total Customers</p>
+                <h3>10</h3>
+                <p>Customers</p>
             </div>
             <div class="icon">
                 <i class="fa fa-user-plus"></i>
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-sm-6">
-        <div class="card s-dashboard-card-sm s-alt bg-success bg-opacity-50">
-            <div class="card-body">
-                <h3>@Model.ProductCount</h3>
-                <p>Product Types</p>
-            </div>
-            <div class="icon">
-                <i class="fa fa-tag"></i>
-            </div>
-        </div>
-    </div>
-</div>
+  </div>
 
 <div class="row">
     <section class="col-lg-7">
         <div class="card s-dashboard-card">
             <div class="card-body">
                 <ul class="nav nav-tabs" role="tablist">
-                    <li class="header"><h3 class="card-title">Orders</h3></li>
+                    <li class="header"><h3 class="card-title">Accounts</h3></li>
                     <li class="nav-item ms-auto"><a class="nav-link active" href="#orders-by-quarter-pane" data-bs-toggle="tab">By Quarter</a></li>
                     <li class="nav-item"><a class="nav-link" href="#orders-by-type-pane" data-bs-toggle="tab">By Type</a></li>
                 </ul>

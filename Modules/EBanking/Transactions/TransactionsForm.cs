@@ -1,3 +1,4 @@
+using cyberbanking.EBanking.Accounts;
 using Serenity.ComponentModel;
 using System;
 using System.ComponentModel;
@@ -22,6 +23,8 @@ public class TransactionsForm
     [HideOnInsert, HideOnUpdate]
     public int SenderAccountId { get; set; }
 
-    //[ReadOnly(true)]
+    public AccountType SenderAccountType { get; set; }
+
     public int ReceiverAccountId { get; set; }
+    public AccountType ReceiverAccountType { get; set; }
 }

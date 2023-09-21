@@ -1,4 +1,5 @@
 ﻿import { TransactionType } from "./Transactions.TransactionType";
+import { AccountType } from "./Accounts.AccountType";
 import { fieldsProxy } from "@serenity-is/corelib/q";
 
 export interface TransactionsRow {
@@ -9,6 +10,8 @@ export interface TransactionsRow {
     Description?: string;
     SenderAccountId?: number;
     ReceiverAccountId?: number;
+    SenderAccountType?: AccountType;
+    ReceiverAccountType?: AccountType;
 }
 
 export abstract class TransactionsRow {

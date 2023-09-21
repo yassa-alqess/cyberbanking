@@ -30,50 +30,71 @@ public class TransactionsEndpoint : ServiceEndpoint
             var currentUserId = (Int32)User.GetIdentifier().TryParseID();
             var Amount = request.Entity.Amount;
             var transactionType = request.Entity.TransactionType;
-            var savingAccounts = uow.Connection.List<AccountsRow>()
-                                                .Where(r =>  r.CustomerId == currentUserId &&
-                                                             r.IsActive == true &&
-                                                             r.AccountType == AccountType.Savings);
-            if (savingAccounts is null)
-                throw new Exception("Error processing current transactions, maybe user has no active account");
+            //var accounts = uow.Connection.List<AccountsRow>()
+            //                                    .Where(r =>  r.CustomerId == currentUserId &&
+            //                                                && r.AccountType == request.Entity
+            //                                                 r.IsActive == true);
+            //if (accounts is null || accounts.Count() == 0)
+                //throw new Exception("Error processing current transactions, maybe user has no active account");
             var senderId = request.Entity.SenderAccountId;
             var receiverId = request.Entity.ReceiverAccountId;
+            AccountsRow sender = null;
+            AccountsRow receiver = null;
             if (request.Entity.SenderAccountId is null)
-            {
-                senderId = savingAccounts.FirstOrDefault().AccountId.Value;
-                if (transactionType != TransactionType.Deposit) //only withdraw from savings accounts.
-                     senderId = savingAccounts.FirstOrDefault(r => r.Balance > Amount).AccountId.Value;
-            }  
-            if (request.Entity.ReceiverAccountId is null)
-                receiverId = savingAccounts.FirstOrDefault().AccountId.Value;
+                senderId = currentUserId;
+            
+            sender = uow.Connection.List<AccountsRow>().FirstOrDefault(r =>
+                                                                       r.CustomerId == senderId &&
+                                                                       r.AccountType == request.Entity.SenderAccountType &&
+                                                                       r.IsActive == true);
 
-            request.Entity.SenderAccountId = senderId;
-            request.Entity.ReceiverAccountId = receiverId;
+             
+             if (transactionType != TransactionType.Deposit && sender.Balance < Amount) //check for balance.
+                   throw new Exception("Insufficient Balance");
+
+             //if (sender == null)
+             //   throw new Exception("Error processing current transactions, maybe user has no active account");
+
+            if (request.Entity.ReceiverAccountId is null)
+            {
+                receiverId = currentUserId;
+                request.Entity.ReceiverAccountType = request.Entity.SenderAccountType; //same if no receiver account type provided
+                if (transactionType == TransactionType.Transfer)
+                    throw new Exception("Error processing current transactions, maybe user has no active account");
+            }
+            receiver = uow.Connection.List<AccountsRow>().FirstOrDefault(r =>
+                                                                            r.CustomerId == receiverId &&
+                                                                            r.AccountType == request.Entity.ReceiverAccountType &&
+                                                                            r.IsActive == true);
+
+
+            request.Entity.SenderAccountId = sender.AccountId.Value;
+            request.Entity.ReceiverAccountId = receiver.AccountId.Value;
             request.Entity.TransactionDate = DateTime.Now;
 
-            var SenderAccount = uow.Connection.List<AccountsRow>().FirstOrDefault(a => a.AccountId == senderId);
-            var ReceiverAccount = uow.Connection.List<AccountsRow>().FirstOrDefault(a => a.AccountId == receiverId);
-            if (SenderAccount is null || ReceiverAccount is null)
+            //var SenderAccount = uow.Connection.List<AccountsRow>().FirstOrDefault(a => a.AccountId == senderId);
+            //var ReceiverAccount = uow.Connection.List<AccountsRow>().FirstOrDefault(a => a.AccountId == receiverId);
+            if (sender is null || receiver is null)
                 throw new Exception("can't process that transfer as either sender or receiver may not has account");
             
             switch (transactionType)
             {
                 case TransactionType.Deposit:
-                    HandleTransactionType(new DepositeHandler(), SenderAccount, ReceiverAccount, Amount);
-                    uow.Connection.UpdateById(SenderAccount);
+                    HandleTransactionType(new DepositeHandler(), sender, receiver, Amount);
+                    uow.Connection.UpdateById(sender);
                     break;
                 case TransactionType.Withdrawal:
-                    if (Amount > SenderAccount.Balance)
+                    if (Amount > sender.Balance)
                         throw new Exception("Insufficient Balance");
-                    HandleTransactionType(new WithdrawalHandler(), SenderAccount, ReceiverAccount, Amount);
-                    uow.Connection.UpdateById(SenderAccount);
+                    HandleTransactionType(new WithdrawalHandler(), sender, receiver, Amount);
+                    uow.Connection.UpdateById(sender);
                     break;
                 case TransactionType.Transfer:
-                    if (Amount > SenderAccount.Balance)
+                    if (Amount > sender.Balance)
                         throw new Exception("Insufficient Balance");
-                    HandleTransactionType(new TransferHandler(), SenderAccount, ReceiverAccount, Amount);
-                    uow.Connection.UpdateById(SenderAccount);
-                    uow.Connection.UpdateById(ReceiverAccount);
+                    HandleTransactionType(new TransferHandler(), sender, receiver, Amount);
+                    uow.Connection.UpdateById(sender);
+                    uow.Connection.UpdateById(receiver);
                     break;
                 default:
                     break;

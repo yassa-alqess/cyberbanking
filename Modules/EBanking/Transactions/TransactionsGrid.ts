@@ -1,7 +1,7 @@
-import { Decorators, EntityGrid, QuickSearchField } from '@serenity-is/corelib';
-import { PermissionKeys, TransactionsColumns, TransactionsRow, TransactionsService, TransactionType } from '@/ServerTypes/EBanking';
+import { Decorators, EntityGrid, LookupEditor, QuickSearchField } from '@serenity-is/corelib';
+import { AccountsRow, AccountsService, PermissionKeys, TransactionsColumns, TransactionsRow, TransactionsService, TransactionType } from '@/ServerTypes/EBanking';
 import { TransactionsDialog } from './TransactionsDialog';
-import { Authorization, indexOf, text, first, tryFirst, toId, } from '@serenity-is/corelib/q';
+import { Authorization, indexOf, text, first, tryFirst, toId, ListRequest, } from '@serenity-is/corelib/q';
 import { UserRow } from '../../Administration';
 
 @Decorators.registerClass('cyberbanking.EBanking.TransactionsGrid')
@@ -50,6 +50,16 @@ export class TransactionsGrid extends EntityGrid<TransactionsRow, any> {
         if (currentUserId !== adminId)
             UserRow.getLookup()?.items.splice(indexOf(UserRow.getLookup()?.items, x => x.UserId === currentUserId), 1);
 
+
+        //not working yet
+        const receiverFilter = first(filters, x => x.field == TransactionsRow.Fields.ReceiverAccountId);
+        receiverFilter.handler = h => {
+            const request = (h.request as ListRequest);
+            const values = (h.widget as LookupEditor).values;
+            values[0] = AccountsRow.getLookup()?.items.filter(x => x.CustomerId === parseInt(values[0])).map(x => x.AccountId).toString();
+    
+            h.handled = false;
+        };
         return filters;
     }
     protected getQuickSearchFields(): QuickSearchField[] {
@@ -74,8 +84,11 @@ export class TransactionsGrid extends EntityGrid<TransactionsRow, any> {
     protected getColumns() {
         const cols = super.getColumns();
         const senderCol = first(cols, x => x.field == TransactionsRow.Fields.SenderAccountId);
-        if (!Authorization.hasPermission(PermissionKeys.Security))
+        //const senderTypeCol = first(cols, x => x.field == TransactionsRow.Fields.SenderAccountType);
+        if (!Authorization.hasPermission(PermissionKeys.Security)) {
             senderCol.visible = false;
+            //senderTypeCol.visible = false;
+        }
         return cols;
     }
 }

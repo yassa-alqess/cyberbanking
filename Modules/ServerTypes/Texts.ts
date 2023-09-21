@@ -90,7 +90,9 @@ namespace cyberbanking.Texts {
                 export const Amount: string;
                 export const Description: string;
                 export const ReceiverAccountId: string;
+                export const ReceiverAccountType: string;
                 export const SenderAccountId: string;
+                export const SenderAccountType: string;
                 export const TransactionDate: string;
                 export const TransactionId: string;
                 export const TransactionType: string;

@@ -13,6 +13,7 @@ namespace cyberbanking.EBanking;
 [ReadPermission(PermissionKeys.Accounts)]
 [ModifyPermission(PermissionKeys.Accounts)]
 [InsertPermission(PermissionKeys.Accounts)]
+[LookupScript("EBanking.Accounts", Permission = "?")]
 [Updatable(false)]
 public sealed class AccountsRow : Row<AccountsRow.RowFields>, IIdRow
 {

@@ -9,19 +9,17 @@ import { AccountsService } from "../../ServerTypes/EBanking";
 export class TransactionListFormatter implements Formatter {
     private accounts: Array<AccountsRow>;
     constructor() {
-        AccountsService.List({
-        },
-            response => {
-                this.accounts = response.Entities;
-            }
-        )
-
+        AccountsService.ListAll({}, response => {
+            this.accounts = response;
+            //console.log(this.accounts);
+        });
     }
     format(ctx: FormatterContext) {
         //debugger;
         let id = ctx.value
         if (!id)
             return "";
+        //console.log(this.accounts);
         let account = this.accounts.find(a => a.AccountId == id);
         let customerId = account.CustomerId;
         let byId = UserRow.getLookup()?.itemById; 

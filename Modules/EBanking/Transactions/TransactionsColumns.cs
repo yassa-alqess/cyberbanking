@@ -1,3 +1,4 @@
+using cyberbanking.EBanking.Accounts;
 using Serenity.ComponentModel;
 using System;
 using System.ComponentModel;
@@ -22,10 +23,17 @@ public class TransactionsColumns
     [TransactionListFormatter]
     public int SenderAccountId { get; set; }
 
+    //[Width(150)]
+    //public AccountType SenderAccountType { get; set; }
+
+
     [Width(150), QuickFilter]
     [TransactionListFormatter]
 
     public int ReceiverAccountId { get; set; }
+
+    //[Width(150)]
+    //public AccountType ReceiverAccountType { get; set; }
 
     [Width(150)]
     public DateTime TransactionDate { get; set; }

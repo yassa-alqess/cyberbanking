@@ -1,4 +1,6 @@
-﻿export * from "./Administration/LanguageColumns"
+﻿export * from "./Administration/GetUserByNameRequest"
+export * from "./Administration/GetUserByNameResponse"
+export * from "./Administration/LanguageColumns"
 export * from "./Administration/LanguageForm"
 export * from "./Administration/LanguageRow"
 export * from "./Administration/LanguageService"

@@ -1,5 +1,6 @@
 ﻿import { DecimalEditor, EnumEditor, DateEditor, TextAreaEditor, LookupEditor, PrefixedContext } from "@serenity-is/corelib";
 import { TransactionType } from "./Transactions.TransactionType";
+import { AccountType } from "./Accounts.AccountType";
 import { initFormType } from "@serenity-is/corelib/q";
 
 export interface TransactionsForm {
@@ -8,7 +9,9 @@ export interface TransactionsForm {
     TransactionDate: DateEditor;
     Description: TextAreaEditor;
     SenderAccountId: LookupEditor;
+    SenderAccountType: EnumEditor;
     ReceiverAccountId: LookupEditor;
+    ReceiverAccountType: EnumEditor;
 }
 
 export class TransactionsForm extends PrefixedContext {
@@ -33,10 +36,12 @@ export class TransactionsForm extends PrefixedContext {
                 'TransactionDate', w2,
                 'Description', w3,
                 'SenderAccountId', w4,
-                'ReceiverAccountId', w4
+                'SenderAccountType', w1,
+                'ReceiverAccountId', w4,
+                'ReceiverAccountType', w1
             ]);
         }
     }
 }
 
-[TransactionType]; // referenced types
+[TransactionType, AccountType]; // referenced types

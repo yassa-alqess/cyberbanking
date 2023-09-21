@@ -29,6 +29,21 @@ export class AccountsGrid extends EntityGrid<AccountsRow, any> {
             //buttons.splice(indexOf(buttons, x => x.title == "add"), 1);
             buttons.splice(0, 1);
             buttons.push({
+                title: 'Activate Accounts',
+                icon: 'fa fa-check',
+                visible: true,
+                cssClass: 'add-button',
+                onClick: e => {
+                    //   debugger;
+                    let accountIds = this.rowSelection.getSelectedKeys();
+                    if (accountIds.length > 0) {
+                        var action = new ActivateBulkAction();
+                        action.done = () => this.rowSelection.resetCheckedAndRefresh();
+                        action.execute(accountIds);
+                    } else notifyError('Please Select Rows to submit');
+                }
+            });
+            buttons.push({
                 title: 'Deactivate Accounts',
                 icon: 'fa fa-ban',
                 visible: true,
@@ -37,12 +52,13 @@ export class AccountsGrid extends EntityGrid<AccountsRow, any> {
                     //   debugger;
                     let accountIds = this.rowSelection.getSelectedKeys();
                     if (accountIds.length > 0) {
-                        var action = new DeleteBulkAction();
+                        var action = new DeactivateBulkAction();
                         action.done = () => this.rowSelection.resetCheckedAndRefresh();
                         action.execute(accountIds);
                     } else notifyError('Please Select Rows to submit');
                 }
             });
+
 
         }
         return buttons;
@@ -74,7 +90,7 @@ export class AccountsGrid extends EntityGrid<AccountsRow, any> {
 }
 
 @Decorators.registerClass('cyberbanking.EBanking.DeleteBulkAction')
-export class DeleteBulkAction extends BulkServiceAction {
+export class DeactivateBulkAction extends BulkServiceAction {
 
 
     protected getParallelRequests() {
@@ -92,6 +108,39 @@ export class DeleteBulkAction extends BulkServiceAction {
     protected executeForBatch(batch) {
 
         AccountsService.DeactivateList(
+            {
+                AccountIds: batch.map(x => parseInteger(x))
+            },
+            response => {
+                this.set_successCount(this.get_successCount() + batch.length)
+            },
+            {
+                blockUI: false,
+                onError: response => this.set_errorCount(this.get_errorCount() + batch.length),
+                onCleanup: () => this.serviceCallCleanup(),
+            });
+
+    }
+}
+
+export class ActivateBulkAction extends BulkServiceAction {
+
+
+    protected getParallelRequests() {
+        return 10;
+    }
+
+    protected getBatchSize() {
+        return 5;
+    }
+
+    protected sccss() {
+        alert('sccss');
+        debugger;
+    }
+    protected executeForBatch(batch) {
+
+        AccountsService.ActivateList(
             {
                 AccountIds: batch.map(x => parseInteger(x))
             },
